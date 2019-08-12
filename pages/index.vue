@@ -17,7 +17,7 @@
           <td>{{task.content}}</td>
           <td @click="changeStatus(task)">{{task.status}}</td>
           <td>{{createdAt(task)}}</td>
-          <td><Timer/></td>
+          <td><Timer :workingTime="task.workingTime" @timer-stop-event="updateWorkingTime($event, task)"></Timer></td>
         </tr>
       </tbody>
     </table>
@@ -74,6 +74,7 @@ export default {
         name: this.name,
         content: this.content,
         status: 0,
+        workingTime: 0,
         createdAt: new Date()
       }
       const tasksRef = db.collection('tasks')
@@ -88,6 +89,10 @@ export default {
       } else {
         taskRef.doc(task.id).set({status: task.status+1},　{merge: true})
       }
+    },
+    updateWorkingTime: function (time, task) {
+      const taskRef = db.collection('tasks')
+      taskRef.doc(task.id).set({workingTime: time},　{merge: true})
     }
   },
 }
