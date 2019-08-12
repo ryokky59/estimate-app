@@ -6,15 +6,18 @@
         <tr>
           <th class="name">タスク名</th>
           <th class="content">内容</th>
+          <th class="status">ステータス</th>
           <th class="created-at">作成日</th>
+          <th class="working-time">作業時間</th>
         </tr>
       </thead>
       <tbody>
-        <!-- ★STEP5 ToDo の要素をループ -->
         <tr v-for="(task, index) in tasks" :key="index">
           <th>{{task.name}}</th>
           <td>{{task.content}}</td>
+          <td @click="changeStatus(task)">{{task.status}}</td>
           <td>{{createdAt(task)}}</td>
+          <td><Timer/></td>
         </tr>
       </tbody>
     </table>
@@ -32,10 +35,15 @@
 </template>
 
 <script>
-import { db } from '~/plugins/firebase.js'
+import {db} from '~/plugins/firebase.js'
 import {mapGetters} from 'vuex';
 
+import Timer from '../components/Timer';
+
 export default {
+  components: {
+    Timer
+  },
   created: function () {
     this.$store.dispatch('setTasksRef', db.collection('tasks'))
   },
@@ -65,12 +73,21 @@ export default {
       const task = {
         name: this.name,
         content: this.content,
+        status: 0,
         createdAt: new Date()
       }
       const tasksRef = db.collection('tasks')
       tasksRef.add(task)
       this.name = ''
       this.content = ''
+    },
+    changeStatus: function (task) {
+      const taskRef = db.collection('tasks')
+      if (task.status == 1) {
+        taskRef.doc(task.id).set({status: 0},　{merge: true})
+      } else {
+        taskRef.doc(task.id).set({status: task.status+1},　{merge: true})
+      }
     }
   },
 }
