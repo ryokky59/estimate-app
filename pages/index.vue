@@ -15,9 +15,9 @@
         <tr v-for="(task, index) in tasks" :key="index">
           <th>{{task.name}}</th>
           <td>{{task.content}}</td>
-          <td @click="changeStatus(task)">{{task.status}}</td>
+          <td @click="changeStatus(task, 'self')">{{labels[task.status]}}</td>
           <td>{{createdAt(task)}}</td>
-          <td><Timer :workingTime="task.workingTime" @timer-stop-event="updateWorkingTime($event, task)"></Timer></td>
+          <td><Timer :workingTime="task.workingTime" @timer-start-event ="changeStatus(task, 'start')" @timer-stop-event="updateWorkingTime($event, task); changeStatus(task, 'stop')"></Timer></td>
         </tr>
       </tbody>
     </table>
@@ -59,13 +59,22 @@ export default {
 
         return `${month}/${date} ${hour}:${min}`
       }
-
+    },
+    labels() {
+      return this.options.reduce(function(a, b) {
+        return Object.assign(a, { [b.value]: b.label })
+      }, {})
     }
   },
   data: function () {
     return {
       name: '',
       content: '',
+      options: [
+        { value: 0, label: '作業停止' },
+        { value: 1, label: '作業中' },
+        { value: 2, label: '作業終了' }
+      ]
     }
   },
   methods: {
@@ -82,12 +91,22 @@ export default {
       this.name = ''
       this.content = ''
     },
-    changeStatus: function (task) {
+    changeStatus: function (task, action) {
       const taskRef = db.collection('tasks')
-      if (task.status == 1) {
-        taskRef.doc(task.id).set({status: 0},　{merge: true})
-      } else {
-        taskRef.doc(task.id).set({status: task.status+1},　{merge: true})
+      switch (action) {
+        case 'start':
+          taskRef.doc(task.id).set({status: 1},　{merge: true});
+          break;
+        case 'stop':
+          taskRef.doc(task.id).set({status: 0},　{merge: true});
+          break;
+        case 'self':
+          if (task.status == 1) {
+            taskRef.doc(task.id).set({status: 0},　{merge: true})
+          } else {
+            taskRef.doc(task.id).set({status: task.status+1},　{merge: true})
+          }
+          break;
       }
     },
     updateWorkingTime: function (time, task) {

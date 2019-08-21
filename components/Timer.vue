@@ -7,7 +7,7 @@
         {{ seconds | zeroPad }}
         <button class="secondary button" @click="startTimer" :disabled="isRunning">START</button>
         <button class="button" @click="stopTimer(); emitWorkingTime();" :disabled="!isRunning">STOP</button>
-        <button class="basic button" @click="clearAll">CLEAR</button>
+        <button class="basic button" @click="clearAll(); emitWorkingTime()">CLEAR</button>
       </p>
     </div>
   </div>
@@ -33,6 +33,7 @@ export default {
       this.startTime = Math.floor(performance.now() - time);
     },
     startTimer: function () {
+      this.$emit('timer-start-event');
       const vm = this;
       vm.isRunning = true;
       vm.setSubtractStartTime(vm.workingTime);
