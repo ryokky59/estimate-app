@@ -13,7 +13,11 @@
       </thead>
       <tbody>
         <tr v-for="(task, index) in tasks" :key="index">
-          <th>{{task.name}}</th>
+          <th>
+            <nuxt-link :to="`/tasks/${task.id}`">
+              {{task.name}}
+            </nuxt-link>
+          </th>
           <td>{{task.content}}</td>
           <td @click="changeStatus(task, 'self')">{{labels[task.status]}}</td>
           <td>{{createdAt(task)}}</td>
@@ -38,7 +42,7 @@
 import {db} from '~/plugins/firebase.js'
 import {mapGetters} from 'vuex';
 
-import Timer from '../components/Timer';
+import Timer from '../../components/Timer';
 
 export default {
   components: {
